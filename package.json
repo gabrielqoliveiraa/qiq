@@ -1,0 +1,23 @@
+{
+  "name": "qiq",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "start": "node dist/index.js",
+    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+    "exec": "ts-node src/index.ts hello $ARGS",
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "yargs": "^17.7.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.5.9",
+    "@types/yargs": "^17.0.24",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.2.2"
+  }
+}
