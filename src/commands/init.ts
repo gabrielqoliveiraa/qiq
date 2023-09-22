@@ -1,6 +1,6 @@
 import fs from "fs"
 
-export const command = 'qiq init';
+export const command = 'init';
 export const describe = 'Start a new repo';
 
 export const handler = () => {
