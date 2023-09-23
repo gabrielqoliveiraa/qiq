@@ -24,6 +24,14 @@ export const handler = () => {
       }
     })
 
+
+    fs.mkdir(".qiq/ref", (err) => {
+      if(err){
+        console.error(`Error to create a ref folder`)
+        return
+      }
+    })  
+
     console.log("Repo started!")
 
   })

@@ -1,60 +1,83 @@
 import recursive from "recursive-readdir"
+import {createHash} from "crypto"
 import path from "path"
 import fs from "fs"
 
 export const command = 'add <file>';
 export const describe = 'Add files';
 
+const hashFunction = (message: string) => {
+    const md5Hash = createHash('md5');
+    const fullHashText = md5Hash.update(message).digest("hex")
+    const subFolder = fullHashText.slice(0,2)
+    const nameHash = fullHashText.slice(2)
+    return [subFolder, nameHash]
+}
+
+const writeFile = (filePath, data) => {
+  fs.writeFile(filePath, data, {encoding:'utf8',flag:'w'}, (err) => {
+    if (err) {
+      console.error(err);
+    }
+  });
+}
+
+const transferFile = (origem: string, objectsPath: string, versionFilePath: string) => {
+  fs.readFile(origem, (err, data) => {
+    if (err) {
+      console.error(err);
+      return 
+    }
+    const isExistsSubFolder = fs.existsSync(objectsPath);
+    if(isExistsSubFolder === true) {
+      writeFile(versionFilePath, data)
+    } else {
+      fs.mkdirSync(objectsPath)
+      writeFile(versionFilePath, data)
+    }
+});
+}
 
 function ignoreFunc(file, stats) {
-    return (stats.isDirectory() && path.basename(file) == ".git") || (stats.isDirectory() && path.basename(file) == "node_modules");
+    return (stats.isDirectory() && path.basename(file) == ".git") || (stats.isDirectory() && path.basename(file) == "node_modules") || (stats.isDirectory() && path.basename(file) == ".qiq");
+}
+
+const insertNewFile = (filePathReceive: string, projectPath: string | null) => {
+  const [subFolder, nameHash] = hashFunction(filePathReceive)
+  const path = `${projectPath}/${filePathReceive}`  
+
+  const destinyPath = __dirname.replace("/src/commands", `/.qiq/objects`);
+  const versionFilePath = `${destinyPath}/${subFolder}/${nameHash}`
+  const objectsPath = `${destinyPath}/${subFolder}`
+
+  const filesListFromDestinyPath = fs.readdirSync(destinyPath);
+  const thereIsObjectInThisSubPath = fs.existsSync(objectsPath) && fs.readdirSync(objectsPath).includes(nameHash)
+
+
+  if ((filesListFromDestinyPath.includes(subFolder)) && thereIsObjectInThisSubPath) {
+    const currentFile = fs.readFileSync(path)
+    const versionFile = fs.readFileSync(versionFilePath)
+    const isEquals = currentFile.equals(versionFile)
+    if (!isEquals) {
+      transferFile(path, objectsPath, versionFilePath)
+    }
+  } else {
+    transferFile(path, objectsPath, versionFilePath)  
   }
+}
 
 
 export const handler = (argv) => {
     const projectPath = process.cwd()
     const filePathReceive = argv.file
     if (filePathReceive == ".") {
-        // CREATE A VERSION OF ALL THE FILES 
-        /*
-            1. Create a dict with the name of the file
-            2. Verify if the file exists by the name, 
-            3. If yes, create a new version,
-            5. If not, just append to the folder versions files
-            
-
-            ## Version of the whole project, verifying each file
-            - Create a index dict with informations about these version like how files name we have 
-            - Verifying by the filename, if have a new one or not have, create a new version of the whole project with new files
-            - If all the filenames match, starting to comparing the content, if have any difference, create a new version of the whole project with new files
-
-
-            ## Create a hash to each file based on the name
-            - Create a hash to each file based on the name 
-            - Compare if have a new hash or deleted a new hash
-            - After that, compare contents, if have a new content, create a new version inside the hash folder
-            
-            Except: Rename File
-        */
         recursive(projectPath, [ignoreFunc], function(err, files) {
-            
-
-            files.map((path, index) => {
-                const origem = path;
-                const destino = __dirname.replace("/src/commands", `/.qiq/objects${index}`);
-
-                fs.copyFile(origem, destino, (err) => {
-                if (err) {
-                    console.error('Erro ao copiar o arquivo:', err);
-                } else {
-                    console.log(`Arquivo copiado com sucesso! em: ${destino}`);
-                }
-                });
+            files.map((path: string) => {
+              const fileName = path.replace(`${projectPath}/`, "")
+              insertNewFile(fileName, projectPath)
             })
-
         })
-
+    } else {
+      insertNewFile(filePathReceive, projectPath)
     }
-
-
 };
