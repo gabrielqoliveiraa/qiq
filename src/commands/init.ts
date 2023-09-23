@@ -30,6 +30,13 @@ export const handler = () => {
         console.error(`Error to create a ref folder`)
         return
       }
+
+      
+      fs.writeFile(".qiq/ref/index.json", JSON.stringify({objects: {}, version: {}}), (err) => {
+        if (err) {
+          console.error(err);
+        }
+      });
     })  
 
     console.log("Repo started!")
