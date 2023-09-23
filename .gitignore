@@ -1,2 +1,4 @@
 node_modules
 .qiq
+
+.DS_Store
