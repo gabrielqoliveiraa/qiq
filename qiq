@@ -1,0 +1,10 @@
+#!/bin/bash
+
+SCRIPT_PATH="./src/index.js"
+
+if [ -f "$SCRIPT_PATH" ]; then
+  node "$SCRIPT_PATH" "$@" 
+else
+  echo "Erro: O script JavaScript não foi encontrado em $SCRIPT_PATH"
+  exit 1
+fi
