@@ -1,12 +1,12 @@
-import recursive from "recursive-readdir";
-import { createHash } from "crypto";
-import path from "path";
-import fs from "fs";
+const recursive = require('recursive-readdir');
+const {createHash} = require("crypto")
+const path = require("path")
+const fs = require("fs")
 
-export const command = 'add <file>';
-export const describe = 'Add files';
+const command = 'add <file>';
+const describe = 'Add files';
 
-const hashFunction = (data: Buffer) => {
+const hashFunction = (data) => {
     const md5Hash = createHash('md5');
     return md5Hash.update(data).digest("hex");
 }
@@ -20,7 +20,7 @@ const writeFile = (filePath, data) => {
     fs.writeFileSync(filePath, data, { encoding: "binary" });
 }
 
-const transferFile = (origem: string, objectsPath: string, versionFilePath: string) => {
+const transferFile = (origem, objectsPath, versionFilePath) => {
     fs.readFile(origem, (err, data) => {
         if (err) {
             console.error(err);
@@ -41,7 +41,7 @@ const transferFile = (origem: string, objectsPath: string, versionFilePath: stri
     });
 }
 
-const updateJsonObject = (filePath: string, hash: string) => {
+const updateJsonObject = (filePath, hash) => {
     const refPath = `${process.cwd()}/.qiq/ref/index.json`;
     const refData = fs.readFileSync(refPath, "utf8");
     const jsonData = JSON.parse(refData);
@@ -52,7 +52,7 @@ const updateJsonObject = (filePath: string, hash: string) => {
     }
 }
 
-const insertNewFile = (filePathReceive: string, projectPath: string | null) => {
+const insertNewFile = (filePathReceive, projectPath) => {
     const path = `${projectPath}/${filePathReceive}`;
     const destinyPath = `${process.cwd()}/.qiq/objects`;
     const objectsPath = `${destinyPath}`;
@@ -86,12 +86,12 @@ const insertNewFile = (filePathReceive: string, projectPath: string | null) => {
     });
 }
 
-export const handler = (argv) => {
+const handler = (argv) => {
     const projectPath = process.cwd();
     const filePathReceive = argv.file;
     if (filePathReceive == ".") {
         recursive(projectPath, [ignoreFunc], function (err, files) {
-            files.map((path: string) => {
+            files.map((path) => {
                 const fileName = path.replace(`${projectPath}/`, "");
                 insertNewFile(fileName, projectPath);
             })
@@ -100,3 +100,6 @@ export const handler = (argv) => {
         insertNewFile(filePathReceive, projectPath);
     }
 };
+
+
+module.exports = { command, describe, handler };

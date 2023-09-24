@@ -1,9 +1,9 @@
-import fs from "fs"
+const fs = require("fs")
 
-export const command = 'init';
-export const describe = 'Start a new repo';
+const command = 'init';
+const describe = 'Start a new repo';
 
-export const handler = () => {
+const handler = () => {
   fs.mkdir(".qiq", (err) => {
     if(err){
       console.error(`Repo already created in ${__dirname.replace("/src/commands", "/.qiq/")}`)
@@ -45,3 +45,6 @@ export const handler = () => {
 
 
 };
+
+
+module.exports = { command, describe, handler };
